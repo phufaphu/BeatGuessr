@@ -1,0 +1,14 @@
+<!-- api/templates/playlists.html -->
+{% load django_vite %}
+<!doctype html>
+<html lang="en">
+<head>
+    <title>BeatGuessr - Playlists</title>
+    {% vite_hmr_client %}
+    {% vite_asset 'src/main.ts' %}
+    {% vite_asset 'src/app.css' %}
+</head>
+<body>
+    <div id="playlists-app"></div>
+</body>
+</html>

@@ -1,8 +1,11 @@
 from django.shortcuts import render
 
 # Create your views here.
-def index(request):
+def index_view(request):
     return render(request, 'index.html')
 
 def about_view(request):
     return render(request, 'about.html')
+
+def playlist_view(request):
+    return render(request, 'playlist.html')
