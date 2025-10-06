@@ -38,16 +38,19 @@ class Game(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='games')
     score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_complete = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Game {self.id} on '{self.playlist.name}' by {self.player.username}"
+        return f"Game #{self.id} by {self.player.username} on '{self.playlist.name}'"
 
 class GameRound(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='rounds')
-    correct_song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='correct_in_rounds')
-    choices = models.ManyToManyField(Song, related_name='choices_in_rounds')
-    user_choice = models.ForeignKey(Song, on_delete=models.SET_NULL, null=True, blank=True, related_name='chosen_in_rounds')
+    correct_song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    user_choice = models.ForeignKey(Song, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
     is_correct = models.BooleanField(null=True, blank=True)
 
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
-        return f"Round for Game {self.game.id} - Song: {self.correct_song.title}"
+        return f"Round for Game #{self.game.id} - Correct Song: {self.correct_song.title}"

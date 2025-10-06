@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Artist, Album, Song, Playlist
+from .models import Artist, Album, Song, Playlist, Game, GameRound
 
 admin.site.register(Artist)
 admin.site.register(Album)
@@ -19,3 +19,13 @@ class PlaylistAdmin(admin.ModelAdmin):
     @admin.display(description='Number of Songs')
     def song_count(self, obj):
         return obj.songs.count()
+
+@admin.register(Game)
+class GameAdmin(admin.ModelAdmin):
+    list_display = ('id', 'player', 'playlist', 'score', 'created_at', 'is_complete')
+    list_filter = ('is_complete', 'playlist', 'player')
+
+@admin.register(GameRound)
+class GameRoundAdmin(admin.ModelAdmin):
+    list_display = ('id', 'game', 'correct_song', 'user_choice', 'is_correct')
+    list_filter = ('game', 'is_correct')
