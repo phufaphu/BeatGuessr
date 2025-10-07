@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Song, Artist
+from .models import Song, Artist, User
 
 # --- OUTPUT SERIALIZERS ---
 class ArtistSerializer(serializers.ModelSerializer):
@@ -39,3 +39,20 @@ class GuessSerializer(serializers.Serializer):
     game_id = serializers.IntegerField(required=True)
     round_id = serializers.IntegerField(required=True)
     choice_id = serializers.IntegerField(required=True)
+
+# --- USER SERIALIZERS ---
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'email', 'first_name', 'last_name']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import axios from "axios";
+  import { untrack } from "svelte";
+  import api from "$lib/api";
   import {
     Gamepad2,
     Music,
@@ -10,29 +11,38 @@
     Timer,
   } from "lucide-svelte";
 
-  const API_BASE_URL = "http://127.0.0.1:8000/api";
   const ROUND_DURATION = 15;
 
-  let gameState: "idle" | "loading" | "playing" | "answered" | "finished" =
-    $state("idle");
-  let gameId: number | null = $state(null);
-  let score: number = $state(0);
-  let currentRound: any = $state(null);
-  let displayedRound: any = $state(null);
-  let lastAnswer: { isCorrect: boolean; correctSongId: number } | null =
-    $state(null);
+  let gameState = $state<
+    "idle" | "loading" | "playing" | "answered" | "finished"
+  >("idle");
+  let gameId = $state<number | null>(null);
+  let score = $state(0);
+  let displayedRound = $state<any>(null);
+  let currentRound = $state<any>(null);
+  let lastAnswer = $state<{ isCorrect: boolean; correctSongId: number } | null>(
+    null
+  );
 
-  let timerValue: number = $state(ROUND_DURATION);
+  let audioPlayer = $state<HTMLAudioElement | null>(null);
   let timerInterval: any = null;
+  let timerValue = $state(ROUND_DURATION);
 
-  let progress = $derived((timerValue / ROUND_DURATION) * 100);
+  $effect(() => {
+    if (gameState === "playing" && displayedRound && audioPlayer) {
+      console.log("Effect triggered: Playing audio for new round.");
+      audioPlayer.currentTime = 0;
+      audioPlayer.play().catch((e) => console.error("Audio play failed:", e));
+    }
+  });
 
-  let startRoundTimer = () => {
+  const progress = $derived((timerValue / ROUND_DURATION) * 100);
+
+  async function startRoundTimer() {
     clearInterval(timerInterval);
-
     timerValue = ROUND_DURATION;
     timerInterval = setInterval(() => {
-      timerValue--;
+      untrack(() => timerValue--);
       if (timerValue <= 0) {
         clearInterval(timerInterval);
         submitGuess(0);
@@ -40,21 +50,17 @@
     }, 1000);
   };
 
-  const startGame = async () => {
+  async function startGame() {
     gameState = "loading";
     try {
-      const response = await axios.post(`${API_BASE_URL}/game/start/`, {
-        playlist_id: 1,
-      });
+      const response = await api.post("/game/start/", { playlist_id: 1 });
       const data = response.data;
-
       gameId = data.game_id;
       score = data.score;
       currentRound = data.current_round;
       displayedRound = currentRound;
       lastAnswer = null;
       gameState = "playing";
-
       startRoundTimer();
     } catch (error) {
       console.error("Failed to start game:", error);
@@ -63,50 +69,56 @@
     }
   };
 
-  async function submitGuess(choiceId: number) {
-    if (gameState !== "playing" || !gameId || !currentRound) return;
-    clearInterval(timerInterval);
-    gameState = "answered";
-    try {
-      const response = await axios.post(`${API_BASE_URL}/game/guess/`, {
-        game_id: gameId,
-        round_id: currentRound.round_id,
-        choice_id: choiceId,
-      });
-      const result = response.data;
-
-      score = result.new_score;
-      lastAnswer = {
-        isCorrect: result.is_correct,
-        correctSongId: result.correct_song_id,
-      };
-
-      currentRound = result.next_round;
-
-      setTimeout(() => {
-        if (result.is_game_over) {
-          gameState = "finished";
-        } else {
-          lastAnswer = null;
-          displayedRound = currentRound;
-          gameState = "playing";
-          startRoundTimer();
-        }
-      }, 2500);
-    } catch (error) {
-      console.error("Failed to submit guess:", error);
-      alert("An error occurred while submitting your answer.");
+  const goToNextRound = () => {
+    if (currentRound) {
+      lastAnswer = null;
+      displayedRound = currentRound;
       gameState = "playing";
+      startRoundTimer();
+    } else {
+      gameState = "finished";
     }
-  }
+  };
 
-  let resetGame = () => {
+ async function submitGuess(choiceId: number) {
+		if (untrack(() => gameState) !== 'playing') {
+			console.warn('Submit guess blocked because gameState is not "playing".');
+			return;
+		}
+		clearInterval(timerInterval);
+		try {
+			const response = await api.post('/game/guess/', {
+				game_id: gameId,
+				round_id: currentRound.round_id,
+				choice_id: choiceId
+			});
+			const result = response.data;
+
+			gameState = 'answered';
+			score = result.new_score;
+			lastAnswer = {
+				isCorrect: result.is_correct,
+				correctSongId: result.correct_song_id
+			};
+			currentRound = result.next_round;
+
+			setTimeout(goToNextRound, 2500);
+		} catch (error) {
+			alert('An error occurred while submitting your answer.');
+			gameState = 'playing';
+			startRoundTimer();
+		}
+	};
+
+  const resetGame = () => {
     gameState = "idle";
     gameId = null;
     score = 0;
     currentRound = null;
+    displayedRound = null;
     lastAnswer = null;
-  };
+    clearInterval(timerInterval);
+  }
 </script>
 
 <main
@@ -174,7 +186,7 @@
           controls
           src={displayedRound.snippet_url}
           class="w-full hidden"
-          autoplay
+          bind:this={audioPlayer}
         >
           Your browser does not support the audio element.
         </audio>
