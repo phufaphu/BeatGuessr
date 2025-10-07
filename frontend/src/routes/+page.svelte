@@ -104,7 +104,6 @@
 
 			setTimeout(goToNextRound, 2500);
 		} catch (error) {
-			alert('An error occurred while submitting your answer.');
 			gameState = 'playing';
 			startRoundTimer();
 		}

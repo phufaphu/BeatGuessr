@@ -18,6 +18,8 @@
         }
       });
       const newUser = userResponse.data as User;
+      localStorage.setItem('accessToken', newAccessToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
       setAuth(newAccessToken, newUser);
       goto('/');
     } catch (err) {
