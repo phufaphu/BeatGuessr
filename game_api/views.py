@@ -69,15 +69,25 @@ class GameViewSet(viewsets.ViewSet):
         with transaction.atomic():
             game = get_object_or_404(Game, id=data['game_id'], is_complete=False)
             current_round = get_object_or_404(GameRound, id=data['round_id'], game=game)
-            user_choice = get_object_or_404(Song, id=data['choice_id'])
+
+            # *** START: LOGIC ใหม่สำหรับจัดการ TIMEOUT ***
+            is_correct = False
+            user_choice = None
+            
+            # ตรวจสอบว่าเป็นการตอบปกติ หรือเวลาหมด
+            if data['choice_id'] > 0: # ถ้า choice_id > 0 คือการตอบปกติ
+                user_choice = get_object_or_404(Song, id=data['choice_id'])
+                is_correct = (current_round.correct_song.id == user_choice.id)
+            # ถ้า choice_id เป็น 0 หรือน้อยกว่า จะถือว่าเวลาหมด (is_correct เป็น False)
 
             if current_round.user_choice is not None:
                 return Response({"detail": "This round has already been answered."}, status=status.HTTP_400_BAD_REQUEST)
-
-            is_correct = (current_round.correct_song.id == user_choice.id)
-            current_round.user_choice = user_choice
+            
+            # บันทึกผลลัพธ์
+            current_round.user_choice = user_choice # ถ้าเวลาหมดจะเป็น None
             current_round.is_correct = is_correct
             current_round.save()
+            # *** END: LOGIC ใหม่ ***
 
             if is_correct:
                 game.score += 10
