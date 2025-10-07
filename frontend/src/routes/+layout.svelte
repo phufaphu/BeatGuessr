@@ -27,7 +27,10 @@
 {:else}
   <div class="min-h-screen bg-gray-900 text-white">
     <nav class="bg-gray-800 p-4 flex justify-between items-center">
-      <a href="/" class="text-xl font-bold">BeatGuessr</a>
+      <div class="flex items-center gap-4">
+        <a href="/" class="text-xl font-bold">BeatGuessr</a>
+        <a href="/playlists" class="text-gray-300 hover:text-white">Playlists</a>
+      </div>
       <div>
         {#if $user}
           <div class="flex items-center gap-4">

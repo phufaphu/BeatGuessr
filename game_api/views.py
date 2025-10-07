@@ -1,7 +1,7 @@
 import random
 from django.shortcuts import get_object_or_404
 from django.db import transaction
-
+from .permissions import IsStaffUser
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -12,7 +12,8 @@ from .serializers import (
     GameStateOutSerializer, GameStartSerializer,
     GuessResultSerializer, GuessSerializer,
     UserSerializer, UserRegisterSerializer,
-    GameHistorySerializer, ChangePasswordSerializer
+    GameHistorySerializer, ChangePasswordSerializer,
+    SimplePlaylistSerializer
 )
 
 def generate_choices(correct_song: Song, all_songs: list) -> list:
@@ -154,3 +155,17 @@ class UserViewSet(viewsets.ViewSet):
         user.save()
         
         return Response({"status": "password set"}, status=status.HTTP_200_OK)
+
+class PlaylistViewSet(viewsets.ModelViewSet):
+    queryset = Playlist.objects.all().prefetch_related('songs')
+    serializer_class = SimplePlaylistSerializer
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsStaffUser]
+        return [permission() for permission in permission_classes]
