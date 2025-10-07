@@ -68,3 +68,12 @@ class GameHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = ['id', 'score', 'created_at', 'is_complete', 'playlist']
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate_new_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long.")
+        return value

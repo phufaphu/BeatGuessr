@@ -12,7 +12,7 @@ from .serializers import (
     GameStateOutSerializer, GameStartSerializer,
     GuessResultSerializer, GuessSerializer,
     UserSerializer, UserRegisterSerializer,
-    GameHistorySerializer
+    GameHistorySerializer, ChangePasswordSerializer
 )
 
 def generate_choices(correct_song: Song, all_songs: list) -> list:
@@ -137,3 +137,20 @@ class UserViewSet(viewsets.ViewSet):
         user_games = Game.objects.filter(player=request.user, is_complete=True).order_by('-created_at')
         serializer = GameHistorySerializer(user_games, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated], url_path='me/set-password')
+    def set_password(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        old_password = serializer.validated_data['old_password']
+        new_password = serializer.validated_data['new_password']
+
+        if not user.check_password(old_password):
+            return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+        
+        return Response({"status": "password set"}, status=status.HTTP_200_OK)

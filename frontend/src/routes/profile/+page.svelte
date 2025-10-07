@@ -3,12 +3,11 @@
 	import { user } from '$lib/authStore';
 	import { onMount } from 'svelte';
 	import { Gamepad2, Calendar, Star } from 'lucide-svelte';
-	import type { User } from '$lib/types';
 
 	// --- State ---
-	let history: any[] = [];
-	let isLoading = true;
-	let error: string | null = null;
+	let history: any[] = $state([]);
+	let isLoading = $state(true);
+	let error: string | null = $state(null);
 
 	// --- Data Fetching ---
 	onMount(async () => {
@@ -43,6 +42,9 @@
 		<div class="mb-8 rounded-lg bg-gray-800/50 p-6 text-center">
 			<h1 class="text-4xl font-bold">{$user.username}'s Profile</h1>
 			<p class="mt-2 text-lg text-gray-400">{$user.email}</p>
+            <a href="/profile/change-password" class="mt-4 inline-block rounded-md border border-purple-500 px-4 py-2 text-purple-300 transition hover:bg-purple-500 hover:text-white">
+			Change Password
+		    </a>
 		</div>
 	{/if}
 
