@@ -11,7 +11,8 @@ from .models import Song, Playlist, Game, GameRound, User
 from .serializers import (
     GameStateOutSerializer, GameStartSerializer,
     GuessResultSerializer, GuessSerializer,
-    UserSerializer, UserRegisterSerializer
+    UserSerializer, UserRegisterSerializer,
+    GameHistorySerializer
 )
 
 def generate_choices(correct_song: Song, all_songs: list) -> list:
@@ -130,3 +131,9 @@ class UserViewSet(viewsets.ViewSet):
     def me(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path='me/history')
+    def my_history(self, request):
+        user_games = Game.objects.filter(player=request.user, is_complete=True).order_by('-created_at')
+        serializer = GameHistorySerializer(user_games, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

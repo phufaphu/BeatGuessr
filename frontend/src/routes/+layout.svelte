@@ -1,19 +1,19 @@
 <script lang="ts">
   import "../app.css";
-  import favicon from '$lib/assets/favicon.svg';
-  import type { LayoutProps } from './$types';
+  import favicon from "$lib/assets/favicon.svg";
+  import type { LayoutProps } from "./$types";
   let { children }: LayoutProps = $props();
-  import { user, isAuthReady, initializeAuth, clearAuth } from '$lib/authStore';
-  import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
+  import { user, isAuthReady, initializeAuth, clearAuth } from "$lib/authStore";
+  import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
 
   onMount(() => {
-      initializeAuth();
+    initializeAuth();
   });
 
   function handleLogout() {
     clearAuth();
-    goto('/login');
+    goto("/login");
   }
 </script>
 
@@ -30,8 +30,16 @@
       <a href="/" class="text-xl font-bold">BeatGuessr</a>
       <div>
         {#if $user}
-          <span>Welcome, {$user.username}!</span>
-          <button onclick={handleLogout} class="ml-4 p-2 bg-red-600">Logout</button>
+          <div class="flex items-center gap-4">
+            <a href="/profile" class="transition hover:text-purple-300">
+              Welcome, {$user.username}!
+            </a>
+            <button
+              onclick={handleLogout}
+              class="rounded bg-red-600 px-3 py-1 text-sm font-bold hover:bg-red-700"
+              >Logout</button
+            >
+          </div>
         {:else}
           <a href="/login" class="p-2">Login</a>
           <a href="/register" class="p-2">Register</a>
@@ -39,7 +47,7 @@
       </div>
     </nav>
     <main>
-	  {@render children?.()}
+      {@render children?.()}
     </main>
   </div>
 {/if}

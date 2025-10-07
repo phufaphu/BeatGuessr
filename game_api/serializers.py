@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Song, Artist, User
+from .models import Song, Artist, User, Game, Playlist
 
 # --- OUTPUT SERIALIZERS ---
 class ArtistSerializer(serializers.ModelSerializer):
@@ -56,3 +56,15 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+
+class SimplePlaylistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Playlist
+        fields = ['id', 'name']
+
+class GameHistorySerializer(serializers.ModelSerializer):
+    playlist = SimplePlaylistSerializer(read_only=True)
+    
+    class Meta:
+        model = Game
+        fields = ['id', 'score', 'created_at', 'is_complete', 'playlist']
