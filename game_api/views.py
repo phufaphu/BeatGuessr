@@ -13,8 +13,11 @@ from .serializers import (
     GuessResultSerializer, GuessSerializer,
     UserSerializer, UserRegisterSerializer,
     GameHistorySerializer, ChangePasswordSerializer,
-    SimplePlaylistSerializer
+    SimplePlaylistSerializer, PlaylistDetailSerializer,
+    AddSongSerializer
 )
+
+from .song_processor import process_youtube_url
 
 def generate_choices(correct_song: Song, all_songs: list) -> list:
     choices = [correct_song]
@@ -157,15 +160,36 @@ class UserViewSet(viewsets.ViewSet):
         return Response({"status": "password set"}, status=status.HTTP_200_OK)
 
 class PlaylistViewSet(viewsets.ModelViewSet):
-    queryset = Playlist.objects.all().prefetch_related('songs')
-    serializer_class = SimplePlaylistSerializer
+    queryset = Playlist.objects.all().prefetch_related('songs', 'songs__artist')
+    
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return PlaylistDetailSerializer
+        return SimplePlaylistSerializer
 
     def get_permissions(self):
-        """
-        Instantiates and returns the list of permissions that this view requires.
-        """
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsStaffUser]
         return [permission() for permission in permission_classes]
+    
+    @action(detail=True, methods=['post'], url_path='add-song')
+    def add_song(self, request, pk=None):
+        playlist = self.get_object()
+        serializer = AddSongSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        song_obj = process_youtube_url(
+            url=data['youtube_url'],
+            title=data['title'],
+            artist_name=data['artist']
+        )
+
+        if not song_obj:
+            return Response({'detail': 'Failed to process YouTube URL.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        playlist.songs.add(song_obj)
+        
+        return Response(PlaylistDetailSerializer(playlist).data, status=status.HTTP_201_CREATED)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Song, Artist, User, Game, Playlist
+from .models import Song, Artist, User, Game, Playlist, Album
 
 # --- OUTPUT SERIALIZERS ---
 class ArtistSerializer(serializers.ModelSerializer):
@@ -77,3 +77,15 @@ class ChangePasswordSerializer(serializers.Serializer):
         if len(value) < 8:
             raise serializers.ValidationError("Password must be at least 8 characters long.")
         return value
+
+class AddSongSerializer(serializers.Serializer):
+    youtube_url = serializers.URLField()
+    title = serializers.CharField(max_length=200)
+    artist = serializers.CharField(max_length=200)
+
+class PlaylistDetailSerializer(serializers.ModelSerializer):
+    songs = SongChoiceSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Playlist
+        fields = ['id', 'name', 'songs']
