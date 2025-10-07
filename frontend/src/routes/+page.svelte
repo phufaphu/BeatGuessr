@@ -10,7 +10,8 @@
     Trophy,
     Timer,
   } from "lucide-svelte";
-
+  import { onMount } from "svelte";
+  import { page } from "$app/stores";
   const ROUND_DURATION = 15;
 
   let gameState = $state<
@@ -38,6 +39,13 @@
 
   const progress = $derived((timerValue / ROUND_DURATION) * 100);
 
+  onMount(() => {
+        const state = $page.state as { playlistId?: number };
+        if (state && state.playlistId) {
+            startGame(state.playlistId);
+        }
+    });
+
   async function startRoundTimer() {
     clearInterval(timerInterval);
     timerValue = ROUND_DURATION;
@@ -50,10 +58,10 @@
     }, 1000);
   };
 
-  async function startGame() {
+  async function startGame(playlistId: number = 1) {
     gameState = "loading";
     try {
-      const response = await api.post("/game/start/", { playlist_id: 1 });
+      const response = await api.post('/game/start/', { playlist_id: playlistId });
       const data = response.data;
       gameId = data.game_id;
       score = data.score;
@@ -139,7 +147,7 @@
           Guess the song from the audio clip. Are you ready?
         </p>
         <button
-          onclick={startGame}
+          onclick={() => startGame()}
           class="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-3 font-bold transition hover:bg-purple-700 active:scale-95"
         >
           <Gamepad2 />

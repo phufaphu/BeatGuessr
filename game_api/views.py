@@ -14,7 +14,7 @@ from .serializers import (
     UserSerializer, UserRegisterSerializer,
     GameHistorySerializer, ChangePasswordSerializer,
     SimplePlaylistSerializer, PlaylistDetailSerializer,
-    AddSongSerializer
+    AddSongSerializer, PlaylistWriteSerializer
 )
 
 from .song_processor import process_youtube_url
@@ -161,10 +161,14 @@ class UserViewSet(viewsets.ViewSet):
 
 class PlaylistViewSet(viewsets.ModelViewSet):
     queryset = Playlist.objects.all().prefetch_related('songs', 'songs__artist')
-    
+
     def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return PlaylistWriteSerializer
+        
         if self.action == 'retrieve':
             return PlaylistDetailSerializer
+        
         return SimplePlaylistSerializer
 
     def get_permissions(self):
