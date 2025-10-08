@@ -43,8 +43,8 @@ class GameViewSet(viewsets.ViewSet):
             return Response({"detail": "Playlist needs at least 4 songs."}, status=status.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
-            game_songs = random.sample(all_songs_in_playlist, min(10, len(all_songs_in_playlist)))
-            player = request.user 
+            game_songs = random.sample(all_songs_in_playlist, min(5, len(all_songs_in_playlist)))
+            player = request.user
             game = Game.objects.create(player=player, playlist=playlist)
             for song in game_songs:
                 GameRound.objects.create(game=game, correct_song=song)
@@ -179,6 +179,18 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             permission_classes = [IsStaffUser]
         return [permission() for permission in permission_classes]
     
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        playlist_instance = serializer.save()
+        
+        read_serializer = SimplePlaylistSerializer(playlist_instance)
+        
+        headers = self.get_success_headers(read_serializer.data)
+        
+        return Response(read_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     @action(detail=True, methods=['post'], url_path='add-song')
     def add_song(self, request, pk=None):
         playlist = self.get_object()
