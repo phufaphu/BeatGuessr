@@ -14,7 +14,8 @@ from .serializers import (
     UserSerializer, UserRegisterSerializer,
     GameHistorySerializer, ChangePasswordSerializer,
     SimplePlaylistSerializer, PlaylistDetailSerializer,
-    AddSongSerializer, PlaylistWriteSerializer
+    AddSongSerializer, PlaylistWriteSerializer,
+    SongActionSerializer
 )
 
 from .song_processor import process_youtube_url
@@ -197,3 +198,18 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         playlist.songs.add(song_obj)
         
         return Response(PlaylistDetailSerializer(playlist).data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['post'], url_path='remove-song')
+    def remove_song(self, request, pk=None):
+        playlist = self.get_object()
+        serializer = SongActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            song_to_remove = Song.objects.get(id=serializer.validated_data['song_id'])
+        except Song.DoesNotExist:
+            return Response({'detail': 'Song not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        playlist.songs.remove(song_to_remove)
+        
+        return Response(PlaylistDetailSerializer(playlist).data, status=status.HTTP_200_OK)

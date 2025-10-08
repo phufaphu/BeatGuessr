@@ -94,3 +94,6 @@ class PlaylistWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
         fields = ['name']
+
+class SongActionSerializer(serializers.Serializer):
+    song_id = serializers.IntegerField(required=True)
