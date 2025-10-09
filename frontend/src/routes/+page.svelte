@@ -13,6 +13,9 @@
   import { onMount } from "svelte";
   import { page } from "$app/stores";
   import { addToast } from "$lib/toastStore";
+  import { user } from '$lib/authStore';
+	import { goto } from '$app/navigation';
+
   const ROUND_DURATION = 15;
 
   let gameState = $state<
@@ -45,7 +48,7 @@
   onMount(() => {
     const state = $page.state as { playlistId?: number };
     if (state && state.playlistId) {
-      startCountdown(state.playlistId);
+      handleStartClick(state.playlistId);
     }
   });
 
@@ -61,12 +64,11 @@
     }, 1000);
   }
 
-  async function fetchAndStartGame(playlistId: number) {
+  async function fetchAndStartGame(playlistId: number | null) {
     gameState = "loading";
     try {
-      const response = await api.post("/game/start/", {
-        playlist_id: playlistId,
-      });
+      const payload = { playlist_id: playlistId };
+			const response = await api.post('/game/start/', payload);
       const data = response.data;
 
       gameId = data.game_id;
@@ -83,20 +85,21 @@
       gameState = "idle";
     }
   }
-  function startCountdown(playlistId: number = 1) {
-    gameState = "countdown";
-    countdownValue = 3;
-    clearInterval(countdownInterval);
-    countdownInterval = setInterval(() => {
-      countdownValue--;
-      if (countdownValue <= 0) {
-        clearInterval(countdownInterval);
-        fetchAndStartGame(playlistId);
-      }
-    }, 1000);
-  }
 
-  const goToNextRound = () => {
+  function startCountdown(playlistId: number | null = null) {
+		gameState = 'countdown';
+		countdownValue = 3;
+		clearInterval(countdownInterval);
+		countdownInterval = setInterval(() => {
+			countdownValue--;
+			if (countdownValue <= 0) {
+				clearInterval(countdownInterval);
+				fetchAndStartGame(playlistId);
+			}
+		}, 1000);
+	}
+
+  function goToNextRound() {
     if (currentRound) {
       lastAnswer = null;
       displayedRound = currentRound;
@@ -136,7 +139,7 @@
     }
   }
 
-  const resetGame = () => {
+  function resetGame() {
     gameState = "idle";
     gameId = null;
     score = 0;
@@ -145,26 +148,35 @@
     lastAnswer = null;
     clearInterval(timerInterval);
   };
+  
+  function handleStartClick(playlistId: number | null = null) {
+		if ($user) {
+      startCountdown(playlistId ?? undefined);
+		} else {
+      addToast("Please log in to start a game.");
+			goto('/login');
+		}
+	}
 </script>
 
 <div
-  class="w-full max-w-md glass md:p-8"
+  class="w-full max-w-xl glass p-4 md:p-8"
 >
   <!-- Header -->
   <div class="mb-6 flex items-center justify-center gap-3">
-    <Music class="h-8 w-8 text-purple-300" />
+    <Music class="h-12 w-12 text-[#00E0FF]" />
     <h1 class="text-4xl font-bold font-orbitron tracking-wider">BeatGuessr</h1>
   </div>
 
   <!-- State: IDLE -->
   {#if gameState === "idle"}
     <div class="text-center">
-      <p class="mb-6 text-white/80">
-        Guess the song from the audio clip. Are you ready?
+      <p class="mb-6 text-white/70">
+        Come prove your music knowledge!
       </p>
       <button
-        onclick={() => startCountdown()}
-        class="flex w-full items-center justify-center gap-2 bg-[#00E0FF] text-black font-semibold px-4 py-3 rounded-lg shadow-[0_0_10px_#00E0FF,0_0_30px_#00E0FF] hover:scale-105 transition-transform"
+        onclick={() => handleStartClick()}
+        class="flex w-full items-center justify-center gap-2 bg-[#00E0FF] text-black font-semibold px-4 py-3 rounded-lg shadow-[0_0_10px_#00E0FF,0_0_30px_#00E0FF] hover:scale-105 active:scale-95 transition-transform"
       >
         <Gamepad2 />
         Start New Game
@@ -177,7 +189,7 @@
     <div class="flex flex-col items-center justify-center gap-4 py-10">
       <div class="relative flex h-32 w-32 items-center justify-center">
         <div
-          class="absolute h-full w-full animate-ping rounded-full bg-purple-500 opacity-75"
+          class="absolute h-full w-full animate-ping rounded-full bg-[#00E0FF] opacity-75"
         ></div>
         <p class="relative text-8xl font-bold">{countdownValue}</p>
       </div>
@@ -188,25 +200,25 @@
   {#if gameState === "loading"}
     <div class="flex flex-col items-center justify-center gap-4 py-10">
       <div
-        class="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-purple-400"
+        class="h-16 w-16 animate-spin rounded-full border-4 border-white/25 border-t-[#00E0FF]"
       ></div>
-      <p class="text-lg text-white/80">Checking answer...</p>
+      <p class="text-lg text-white/70">Checking answer...</p>
     </div>
   {/if}
 
   <!-- State: PLAYING or ANSWERED -->
   {#if (gameState === "playing" || gameState === "answered") && displayedRound}
     <div class="space-y-5">
-      <div class="flex justify-between text-lg">
-        <span class="font-semibold"
-          >Score: <span class="text-purple-300">{score}</span></span
+      <div class="flex justify-between items-center text-lg">
+        <div class="font-semibold text-2xl"
+          >Score: <span class="text-[#5bf3ff]">{score}</span></div
         >
         <div
-          class="flex items-center gap-2 rounded-full bg-black/20 px-3 py-1 text-purple-300"
+          class="flex items-center gap-2 rounded-full bg-black/20 px-3 py-1 text-[#5bf3ff] w-[45%]"
         >
-          <Timer class="h-5 w-5" />
-          <span class="font-mono text-xl font-bold">{timerValue}</span>
-          <div class="w-full rounded-full bg-white/10">
+          <Timer class="h-8 w-8" />
+          <span class="text-xl font-bold">{timerValue}</span>
+          <div class="w-full rounded-full bg-white/10 h-2 overflow-hidden">
             <div
               class="rounded-full h-2 transition-all duration-1000 ease-linear"
               class:bg-green-500={progress > 50}
@@ -245,8 +257,7 @@
           >
             <div class="flex items-center justify-between">
               <div>
-                <p class="font-semibold">{choice.title}</p>
-                <p class="text-sm text-white/70">{choice.artist_name}</p>
+                <p class="text-xl font-semibold">{choice.title}</p>
               </div>
               {#if gameState === "answered"}
                 {#if isCorrect}
@@ -267,11 +278,11 @@
     <div class="text-center">
       <Trophy class="mx-auto mb-4 h-16 w-16 text-yellow-400" />
       <h2 class="text-3xl font-bold">Congratulations!</h2>
-      <p class="mt-2 text-xl text-white/80">Your final score is:</p>
-      <p class="my-4 text-7xl font-bold text-purple-300">{score}</p>
+      <p class="mt-2 text-xl text-white/70">Your final score is:</p>
+      <p class="my-4 text-7xl font-bold text-[#5bf3ff]">{score}</p>
       <button
         onclick={resetGame}
-        class="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-3 font-bold transition hover:bg-purple-700 active:scale-95"
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#00E0FF] px-4 py-3 font-bold transition hover:bg-[#00c4e5] hover:scale-105 active:scale-95"
       >
         <RefreshCw />
         Play Again

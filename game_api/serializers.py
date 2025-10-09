@@ -33,7 +33,7 @@ class GuessResultSerializer(serializers.Serializer):
 
 # --- INPUT SERIALIZERS ---
 class GameStartSerializer(serializers.Serializer):
-    playlist_id = serializers.IntegerField(required=True)
+    playlist_id = serializers.IntegerField(required=False, allow_null=True)
 
 class GuessSerializer(serializers.Serializer):
     game_id = serializers.IntegerField(required=True)

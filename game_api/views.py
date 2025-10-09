@@ -35,9 +35,19 @@ class GameViewSet(viewsets.ViewSet):
     def start_game(self, request):
         serializer = GameStartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        playlist_id = serializer.validated_data['playlist_id']
+        playlist_id = serializer.validated_data.get('playlist_id') # ใช้ .get()
+        if playlist_id:
+            playlist = get_object_or_404(Playlist, id=playlist_id)
+        else:
+            playable_playlists = Playlist.objects.annotate(
+                song_count=Count('songs')
+            ).filter(song_count__gte=4)
 
-        playlist = get_object_or_404(Playlist, id=playlist_id)
+            if not playable_playlists.exists():
+                return Response({"detail": "No playable playlists available."}, status=status.HTTP_404_NOT_FOUND)
+            
+            playlist = random.choice(list(playable_playlists))
+
         all_songs_in_playlist = list(playlist.songs.all())
 
         if len(all_songs_in_playlist) < 4:
