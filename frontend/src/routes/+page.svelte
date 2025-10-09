@@ -15,7 +15,7 @@
   const ROUND_DURATION = 15;
 
   let gameState = $state<
-    "idle" | "loading" | "playing" | "answered" | "finished"
+    "idle" | "loading" | "countdown" | "playing" | "answered" | "finished"
   >("idle");
   let gameId = $state<number | null>(null);
   let score = $state(0);
@@ -24,6 +24,8 @@
   let lastAnswer = $state<{ isCorrect: boolean; correctSongId: number } | null>(
     null
   );
+  let countdownValue = $state(3);
+  let countdownInterval: any = null;
 
   let audioPlayer = $state<HTMLAudioElement | null>(null);
   let timerInterval: any = null;
@@ -40,11 +42,11 @@
   const progress = $derived((timerValue / ROUND_DURATION) * 100);
 
   onMount(() => {
-        const state = $page.state as { playlistId?: number };
-        if (state && state.playlistId) {
-            startGame(state.playlistId);
-        }
-    });
+    const state = $page.state as { playlistId?: number };
+    if (state && state.playlistId) {
+      startCountdown(state.playlistId);
+    }
+  });
 
   async function startRoundTimer() {
     clearInterval(timerInterval);
@@ -56,18 +58,22 @@
         submitGuess(0);
       }
     }, 1000);
-  };
+  }
 
-  async function startGame(playlistId: number = 1) {
+  async function fetchAndStartGame(playlistId: number) {
     gameState = "loading";
     try {
-      const response = await api.post('/game/start/', { playlist_id: playlistId });
+      const response = await api.post("/game/start/", {
+        playlist_id: playlistId,
+      });
       const data = response.data;
+
       gameId = data.game_id;
       score = data.score;
       currentRound = data.current_round;
       displayedRound = currentRound;
       lastAnswer = null;
+
       gameState = "playing";
       startRoundTimer();
     } catch (error) {
@@ -75,7 +81,19 @@
       alert("Could not start the game. Is the backend server running?");
       gameState = "idle";
     }
-  };
+  }
+  function startCountdown(playlistId: number = 1) {
+    gameState = "countdown";
+    countdownValue = 3;
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      countdownValue--;
+      if (countdownValue <= 0) {
+        clearInterval(countdownInterval);
+        fetchAndStartGame(playlistId);
+      }
+    }, 1000);
+  }
 
   const goToNextRound = () => {
     if (currentRound) {
@@ -88,34 +106,34 @@
     }
   };
 
- async function submitGuess(choiceId: number) {
-		if (untrack(() => gameState) !== 'playing') {
-			console.warn('Submit guess blocked because gameState is not "playing".');
-			return;
-		}
-		clearInterval(timerInterval);
-		try {
-			const response = await api.post('/game/guess/', {
-				game_id: gameId,
-				round_id: currentRound.round_id,
-				choice_id: choiceId
-			});
-			const result = response.data;
+  async function submitGuess(choiceId: number) {
+    if (untrack(() => gameState) !== "playing") {
+      console.warn('Submit guess blocked because gameState is not "playing".');
+      return;
+    }
+    clearInterval(timerInterval);
+    try {
+      const response = await api.post("/game/guess/", {
+        game_id: gameId,
+        round_id: currentRound.round_id,
+        choice_id: choiceId,
+      });
+      const result = response.data;
 
-			gameState = 'answered';
-			score = result.new_score;
-			lastAnswer = {
-				isCorrect: result.is_correct,
-				correctSongId: result.correct_song_id
-			};
-			currentRound = result.next_round;
+      gameState = "answered";
+      score = result.new_score;
+      lastAnswer = {
+        isCorrect: result.is_correct,
+        correctSongId: result.correct_song_id,
+      };
+      currentRound = result.next_round;
 
-			setTimeout(goToNextRound, 2500);
-		} catch (error) {
-			gameState = 'playing';
-			startRoundTimer();
-		}
-	};
+      setTimeout(goToNextRound, 2500);
+    } catch (error) {
+      gameState = "playing";
+      startRoundTimer();
+    }
+  }
 
   const resetGame = () => {
     gameState = "idle";
@@ -125,7 +143,7 @@
     displayedRound = null;
     lastAnswer = null;
     clearInterval(timerInterval);
-  }
+  };
 </script>
 
 <main
@@ -147,12 +165,26 @@
           Guess the song from the audio clip. Are you ready?
         </p>
         <button
-          onclick={() => startGame()}
+          onclick={() => startCountdown()}
           class="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-3 font-bold transition hover:bg-purple-700 active:scale-95"
         >
           <Gamepad2 />
           Start New Game
         </button>
+      </div>
+    {/if}
+
+    <!-- State: COUNTDOWN -->
+    {#if gameState === "countdown"}
+      <div class="flex flex-col items-center justify-center gap-4 py-10">
+        <p class="text-2xl text-white/80">Get Ready!</p>
+        <!-- ตัวเลขจะแสดงผลพร้อม animation เล็กน้อย -->
+        <div class="relative flex h-32 w-32 items-center justify-center">
+          <div
+            class="absolute h-full w-full animate-ping rounded-full bg-purple-500 opacity-75"
+          ></div>
+          <p class="relative text-8xl font-bold">{countdownValue}</p>
+        </div>
       </div>
     {/if}
 
@@ -238,7 +270,7 @@
     {#if gameState === "finished"}
       <div class="text-center">
         <Trophy class="mx-auto mb-4 h-16 w-16 text-yellow-400" />
-        <h2 class="text-3xl font-bold">Game Over!</h2>
+        <h2 class="text-3xl font-bold">Congratulations!</h2>
         <p class="mt-2 text-xl text-white/80">Your final score is:</p>
         <p class="my-4 text-7xl font-bold text-purple-300">{score}</p>
         <button

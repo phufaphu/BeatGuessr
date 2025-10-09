@@ -97,3 +97,6 @@ class PlaylistWriteSerializer(serializers.ModelSerializer):
 
 class SongActionSerializer(serializers.Serializer):
     song_id = serializers.IntegerField(required=True)
+
+class ImportPlaylistSerializer(serializers.Serializer):
+    youtube_playlist_url = serializers.URLField()

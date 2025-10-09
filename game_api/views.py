@@ -6,7 +6,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
-
+from .tasks import import_youtube_playlist
 from .models import Song, Playlist, Game, GameRound, User
 from .serializers import (
     GameStateOutSerializer, GameStartSerializer,
@@ -225,3 +225,17 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         playlist.songs.remove(song_to_remove)
         
         return Response(PlaylistDetailSerializer(playlist).data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['post'], url_path='import-playlist')
+    def import_playlist(self, request, pk=None):
+        playlist = self.get_object()
+        serializer = ImportPlaylistSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        youtube_url = serializer.validated_data['youtube_playlist_url']
+
+        import_youtube_playlist.delay(playlist_id=playlist.id, youtube_playlist_url=youtube_url)
+
+        return Response(
+            {'status': 'Playlist import started in the background.'},
+            status=status.HTTP_202_ACCEPTED
+        )
