@@ -79,7 +79,7 @@
       startRoundTimer();
     } catch (error) {
       console.error("Failed to start game:", error);
-      addToast("Failed to start game. Please try again.", 'error');
+      addToast("Failed to start game. Please try again.", "error");
       gameState = "idle";
     }
   }
@@ -147,141 +147,135 @@
   };
 </script>
 
-<main
-  class="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-900 p-4 font-sans text-white"
+<div
+  class="w-full max-w-md glass md:p-8"
 >
-  <div
-    class="w-full max-w-md rounded-2xl border border-white/20 bg-white/10 p-6 text-white shadow-lg backdrop-blur-xl md:p-8"
-  >
-    <!-- Header -->
-    <div class="mb-6 flex items-center justify-center gap-3">
-      <Music class="h-8 w-8 text-purple-300" />
-      <h1 class="text-4xl font-bold tracking-wider">BeatGuessr</h1>
+  <!-- Header -->
+  <div class="mb-6 flex items-center justify-center gap-3">
+    <Music class="h-8 w-8 text-purple-300" />
+    <h1 class="text-4xl font-bold font-orbitron tracking-wider">BeatGuessr</h1>
+  </div>
+
+  <!-- State: IDLE -->
+  {#if gameState === "idle"}
+    <div class="text-center">
+      <p class="mb-6 text-white/80">
+        Guess the song from the audio clip. Are you ready?
+      </p>
+      <button
+        onclick={() => startCountdown()}
+        class="flex w-full items-center justify-center gap-2 bg-[#00E0FF] text-black font-semibold px-4 py-3 rounded-lg shadow-[0_0_10px_#00E0FF,0_0_30px_#00E0FF] hover:scale-105 transition-transform"
+      >
+        <Gamepad2 />
+        Start New Game
+      </button>
     </div>
+  {/if}
 
-    <!-- State: IDLE -->
-    {#if gameState === "idle"}
-      <div class="text-center">
-        <p class="mb-6 text-white/80">
-          Guess the song from the audio clip. Are you ready?
-        </p>
-        <button
-          onclick={() => startCountdown()}
-          class="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-3 font-bold transition hover:bg-purple-700 active:scale-95"
-        >
-          <Gamepad2 />
-          Start New Game
-        </button>
-      </div>
-    {/if}
-
-    <!-- State: COUNTDOWN -->
-    {#if gameState === "countdown"}
-      <div class="flex flex-col items-center justify-center gap-4 py-10">
-        <p class="text-2xl text-white/80">Get Ready!</p>
-        <!-- ตัวเลขจะแสดงผลพร้อม animation เล็กน้อย -->
-        <div class="relative flex h-32 w-32 items-center justify-center">
-          <div
-            class="absolute h-full w-full animate-ping rounded-full bg-purple-500 opacity-75"
-          ></div>
-          <p class="relative text-8xl font-bold">{countdownValue}</p>
-        </div>
-      </div>
-    {/if}
-
-    <!-- State: LOADING -->
-    {#if gameState === "loading"}
-      <div class="flex flex-col items-center justify-center gap-4 py-10">
+  <!-- State: COUNTDOWN -->
+  {#if gameState === "countdown"}
+    <div class="flex flex-col items-center justify-center gap-4 py-10">
+      <div class="relative flex h-32 w-32 items-center justify-center">
         <div
-          class="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-purple-400"
+          class="absolute h-full w-full animate-ping rounded-full bg-purple-500 opacity-75"
         ></div>
-        <p class="text-lg text-white/80">Checking answer...</p>
+        <p class="relative text-8xl font-bold">{countdownValue}</p>
       </div>
-    {/if}
+    </div>
+  {/if}
 
-    <!-- State: PLAYING or ANSWERED -->
-    {#if (gameState === "playing" || gameState === "answered") && displayedRound}
-      <div class="space-y-5">
-        <div class="flex justify-between text-lg">
-          <span class="font-semibold"
-            >Score: <span class="text-purple-300">{score}</span></span
-          >
-          <div
-            class="flex items-center gap-2 rounded-full bg-black/20 px-3 py-1 text-purple-300"
-          >
-            <Timer class="h-5 w-5" />
-            <span class="font-mono text-xl font-bold">{timerValue}</span>
-            <div class="w-full rounded-full bg-white/10">
-              <div
-                class="rounded-full h-2 transition-all duration-1000 ease-linear"
-                class:bg-green-500={progress > 50}
-                class:bg-yellow-500={progress <= 50 && progress > 25}
-                class:bg-red-500={progress <= 25}
-                style="width: {progress}%"
-              ></div>
-            </div>
+  <!-- State: LOADING -->
+  {#if gameState === "loading"}
+    <div class="flex flex-col items-center justify-center gap-4 py-10">
+      <div
+        class="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-purple-400"
+      ></div>
+      <p class="text-lg text-white/80">Checking answer...</p>
+    </div>
+  {/if}
+
+  <!-- State: PLAYING or ANSWERED -->
+  {#if (gameState === "playing" || gameState === "answered") && displayedRound}
+    <div class="space-y-5">
+      <div class="flex justify-between text-lg">
+        <span class="font-semibold"
+          >Score: <span class="text-purple-300">{score}</span></span
+        >
+        <div
+          class="flex items-center gap-2 rounded-full bg-black/20 px-3 py-1 text-purple-300"
+        >
+          <Timer class="h-5 w-5" />
+          <span class="font-mono text-xl font-bold">{timerValue}</span>
+          <div class="w-full rounded-full bg-white/10">
+            <div
+              class="rounded-full h-2 transition-all duration-1000 ease-linear"
+              class:bg-green-500={progress > 50}
+              class:bg-yellow-500={progress <= 50 && progress > 25}
+              class:bg-red-500={progress <= 25}
+              style="width: {progress}%"
+            ></div>
           </div>
         </div>
-        <audio
-          controls
-          src={displayedRound.snippet_url}
-          class="w-full hidden"
-          bind:this={audioPlayer}
-        >
-          Your browser does not support the audio element.
-        </audio>
+      </div>
+      <audio
+        controls
+        src={displayedRound.snippet_url}
+        class="w-full hidden"
+        bind:this={audioPlayer}
+      >
+        Your browser does not support the audio element.
+      </audio>
 
-        <div class="grid grid-cols-1 gap-3 pt-2">
-          {#each displayedRound.choices as choice}
-            {@const isCorrect = lastAnswer?.correctSongId === choice.id}
-            {@const isSelectedWrong =
-              !isCorrect && lastAnswer && gameState === "answered"}
+      <div class="grid grid-cols-1 gap-3 pt-2">
+        {#each displayedRound.choices as choice}
+          {@const isCorrect = lastAnswer?.correctSongId === choice.id}
+          {@const isSelectedWrong =
+            !isCorrect && lastAnswer && gameState === "answered"}
 
-            <button
-              onclick={() => submitGuess(choice.id)}
-              disabled={gameState === "answered"}
-              class={`group w-full rounded-lg border-2 p-3 text-left transition
+          <button
+            onclick={() => submitGuess(choice.id)}
+            disabled={gameState === "answered"}
+            class={`group w-full rounded-lg border-2 p-3 text-left transition
 								${isCorrect && gameState === "answered" ? "border-green-500" : ""}
 								${isSelectedWrong ? "border-red-500" : ""}
 								${!lastAnswer || gameState !== "answered" ? "border-white/30" : ""}
 								${gameState === "playing" ? "hover:bg-white/20" : ""}
 								${gameState === "answered" ? "cursor-wait" : ""}
 							`}
-            >
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="font-semibold">{choice.title}</p>
-                  <p class="text-sm text-white/70">{choice.artist_name}</p>
-                </div>
-                {#if gameState === "answered"}
-                  {#if isCorrect}
-                    <CircleCheck class="text-green-400" />
-                  {:else}
-                    <CircleX class="text-red-400 opacity-50" />
-                  {/if}
-                {/if}
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-semibold">{choice.title}</p>
+                <p class="text-sm text-white/70">{choice.artist_name}</p>
               </div>
-            </button>
-          {/each}
-        </div>
+              {#if gameState === "answered"}
+                {#if isCorrect}
+                  <CircleCheck class="text-green-400" />
+                {:else}
+                  <CircleX class="text-red-400 opacity-50" />
+                {/if}
+              {/if}
+            </div>
+          </button>
+        {/each}
       </div>
-    {/if}
+    </div>
+  {/if}
 
-    <!-- State: FINISHED (จบเกม) -->
-    {#if gameState === "finished"}
-      <div class="text-center">
-        <Trophy class="mx-auto mb-4 h-16 w-16 text-yellow-400" />
-        <h2 class="text-3xl font-bold">Congratulations!</h2>
-        <p class="mt-2 text-xl text-white/80">Your final score is:</p>
-        <p class="my-4 text-7xl font-bold text-purple-300">{score}</p>
-        <button
-          onclick={resetGame}
-          class="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-3 font-bold transition hover:bg-purple-700 active:scale-95"
-        >
-          <RefreshCw />
-          Play Again
-        </button>
-      </div>
-    {/if}
-  </div>
-</main>
+  <!-- State: FINISHED (จบเกม) -->
+  {#if gameState === "finished"}
+    <div class="text-center">
+      <Trophy class="mx-auto mb-4 h-16 w-16 text-yellow-400" />
+      <h2 class="text-3xl font-bold">Congratulations!</h2>
+      <p class="mt-2 text-xl text-white/80">Your final score is:</p>
+      <p class="my-4 text-7xl font-bold text-purple-300">{score}</p>
+      <button
+        onclick={resetGame}
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-3 font-bold transition hover:bg-purple-700 active:scale-95"
+      >
+        <RefreshCw />
+        Play Again
+      </button>
+    </div>
+  {/if}
+</div>

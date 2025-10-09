@@ -25,35 +25,35 @@
 </svelte:head>
 <ToastContainer />
 {#if !$isAuthReady}
-  <div class="flex min-h-screen items-center justify-center bg-gray-900">
-    <p class="text-white">Initializing application...</p>
+  <div class="flex min-h-screen items-center justify-center bg-gradient-to-tr from-[#1E1F29] via-[#2A2D3E] to-[#3A0CA3]">
+    <p class="text-white font-bold text-3xl">Initializing application...</p>
   </div>
 {:else}
-  <div class="min-h-screen bg-gray-900 text-white">
-    <nav class="bg-gray-800 p-4 flex justify-between items-center">
-      <div class="flex items-center gap-4">
-        <a href="/" class="text-xl font-bold">BeatGuessr</a>
-        <a href="/playlists" class="text-gray-300 hover:text-white">Playlists</a>
+  <div class="min-h-screen bg-gradient-to-tr from-[#1E1F29] via-[#2A2D3E] to-[#3A0CA3] p-4 font-poppins text-white flex flex-col">
+    <nav class="relative flex justify-between items-center top-4 glass p-4 mx-52">
+      <div class="flex items-center gap-8">
+        <a href="/" class="text-2xl font-extrabold font-orbitron">BeatGuessr</a>
+        <a href="/playlists" class="text-md text-white font-bold hover:text-[#FF5ACD] transition">Playlists</a>
       </div>
       <div>
         {#if $user}
           <div class="flex items-center gap-4">
-            <a href="/profile" class="transition hover:text-purple-300">
+            <a href="/profile" class="transition hover:text-[#FF5ACD]">
               Welcome, {$user.username}!
             </a>
             <button
               onclick={handleLogout}
-              class="rounded bg-red-600 px-3 py-1 text-sm font-bold hover:bg-red-700"
+              class="rounded bg-[#A855F7] px-3 py-2 text-md font-bold hover:bg-[#9133ea] transition"
               >Logout</button
             >
           </div>
         {:else}
-          <a href="/login" class="p-2">Login</a>
-          <a href="/register" class="p-2">Register</a>
+          <a href="/login" class="px-3 py-2 text-md font-bold hover:text-[#FF5ACD] transition">Login</a>
+          <a href="/register" class="px-3 py-2 text-md font-bold hover:text-[#FF5ACD] transition">Register</a>
         {/if}
       </div>
     </nav>
-    <main>
+    <main class="flex-1 flex items-center justify-center">
       {@render children?.()}
     </main>
   </div>
