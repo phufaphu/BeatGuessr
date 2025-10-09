@@ -2,8 +2,11 @@
   import type { PageData } from "./$types";
   import api from "$lib/api";
   import { X, Youtube } from "lucide-svelte";
-  const { data } = $props<{ data: PageData }>();
   import { writable } from "svelte/store";
+  import { addToast } from "$lib/toastStore";
+  
+  const { data } = $props<{ data: PageData }>();
+
   let playlist = $state(writable(data.playlist));
   let logs = $state<string[]>([]);
   let ws: WebSocket | null = null;
@@ -29,8 +32,10 @@
       youtubeUrl = "";
       title = "";
       artist = "";
+      addToast('Song added successfully!', 'success');
     } catch (err: any) {
       formError = err.response?.data?.detail || "Failed to add song.";
+      addToast(formError ?? "Failed to add song.", 'error');
     } finally {
       isAdding = false;
     }
@@ -50,9 +55,10 @@
         }
       );
       playlist.set(response.data);
+      addToast('Song removed from playlist.', 'info');
     } catch (error) {
       console.error("Failed to remove song", error);
-      alert("Could not remove the song.");
+      addToast("Could not remove the song.", 'error');
     }
   }
 
@@ -69,9 +75,10 @@
       );
       importMessage = response.data.status;
       youtubePlaylistUrl = "";
+      addToast(importMessage ?? "Import started successfully.", 'success');
     } catch (error) {
       importMessage = "Failed to start import process.";
-      console.error("Import failed:", error);
+      addToast(importMessage, 'error');
     } finally {
       isImporting = false;
     }

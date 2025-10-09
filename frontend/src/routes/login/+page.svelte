@@ -3,6 +3,7 @@
   import api from '$lib/api';
   import { goto } from '$app/navigation';
   import type { User } from '$lib/types';
+  import { addToast } from '$lib/toastStore';
 
   let username = $state('');
   let password = $state('');
@@ -21,9 +22,11 @@
       localStorage.setItem('accessToken', newAccessToken);
       localStorage.setItem('user', JSON.stringify(newUser));
       setAuth(newAccessToken, newUser);
+      addToast("Login successful! Welcome back.", 'success');
       goto('/');
     } catch (err) {
       error = 'Invalid username or password.';
+      addToast(error, 'error');
     }
   }
 </script>
@@ -34,6 +37,5 @@
     <input bind:value={username} placeholder="Username" class="p-2 w-full text-white">
     <input bind:value={password} type="password" placeholder="Password" class="p-2 w-full text-white">
     <button type="submit" class="p-2 bg-purple-600 w-full">Login</button>
-    {#if error}<p class="text-red-500">{error}</p>{/if}
   </form>
 </div>

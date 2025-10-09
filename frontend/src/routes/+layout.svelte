@@ -5,6 +5,8 @@
   let { children }: LayoutProps = $props();
   import { user, isAuthReady, initializeAuth, clearAuth } from "$lib/authStore";
   import { goto } from "$app/navigation";
+  import ToastContainer from "$lib/components/ToastContainer.svelte";
+  import { addToast } from "$lib/toastStore";
   import { onMount } from "svelte";
 
   onMount(() => {
@@ -13,6 +15,7 @@
 
   function handleLogout() {
     clearAuth();
+	addToast("Logged out successfully.", 'info');
     goto("/login");
   }
 </script>
@@ -20,6 +23,7 @@
 <svelte:head>
   <link rel="icon" href={favicon} />
 </svelte:head>
+<ToastContainer />
 {#if !$isAuthReady}
   <div class="flex min-h-screen items-center justify-center bg-gray-900">
     <p class="text-white">Initializing application...</p>

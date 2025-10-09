@@ -2,12 +2,12 @@
 	import api from '$lib/api';
 	import { goto } from '$app/navigation';
 	import { setAuth } from '$lib/authStore';
+    import { addToast } from '$lib/toastStore';
 	let username = $state('');
 	let password = $state('');
 	let email = $state('');
 	let error: string | null = $state(null);
 	let isLoading = $state(false);
-
 
 	async function handleRegister() {
 		isLoading = true;
@@ -29,6 +29,7 @@
             localStorage.setItem('accessToken', newAccessToken);
             localStorage.setItem('user', JSON.stringify(newUser));
 			setAuth(newAccessToken, newUser);
+            addToast("Registration successful! Welcome aboard.", 'success');
 			goto('/');
 		} catch (err: any) {
 			if (err.response && err.response.data) {
@@ -37,6 +38,7 @@
 				error = 'An unknown error occurred during registration.';
 			}
 			console.error('Registration failed:', err);
+			addToast("Registration failed. Please try again.", 'error');
 		} finally {
 			isLoading = false;
 		}

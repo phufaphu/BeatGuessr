@@ -12,6 +12,7 @@
   } from "lucide-svelte";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
+  import { addToast } from "$lib/toastStore";
   const ROUND_DURATION = 15;
 
   let gameState = $state<
@@ -78,7 +79,7 @@
       startRoundTimer();
     } catch (error) {
       console.error("Failed to start game:", error);
-      alert("Could not start the game. Is the backend server running?");
+      addToast("Failed to start game. Please try again.", 'error');
       gameState = "idle";
     }
   }

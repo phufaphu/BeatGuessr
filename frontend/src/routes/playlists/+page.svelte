@@ -3,7 +3,7 @@
     import { user } from '$lib/authStore';
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import { Edit, Gamepad2, Plus } from 'lucide-svelte';
+    import { SquarePen, Gamepad2, Plus } from 'lucide-svelte';
 
     interface SimplePlaylist {
         id: number;
@@ -76,7 +76,7 @@
                                 title="Edit Playlist"
                                 class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-500 p-2 text-gray-300 hover:bg-gray-700"
                             >
-                                <Edit class="h-4 w-4"/>
+                                <SquarePen class="h-4 w-4"/>
                             </a>
                         {/if}
                     </div>
