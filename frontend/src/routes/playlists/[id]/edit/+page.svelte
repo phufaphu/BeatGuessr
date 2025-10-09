@@ -5,7 +5,8 @@
   const { data } = $props<{ data: PageData }>();
   import { writable } from "svelte/store";
   let playlist = $state(writable(data.playlist));
-
+  let logs = $state<string[]>([]);
+  let ws: WebSocket | null = null;
   let youtubeUrl = $state("");
   let youtubePlaylistUrl = $state("");
   let isImporting = $state(false);
@@ -58,6 +59,7 @@
   async function handleImportPlaylist() {
     isImporting = true;
     importMessage = null;
+    setupWebSocket($playlist.id);
     try {
       const response = await api.post(
         `/playlists/${$playlist.id}/import-playlist/`,
@@ -73,6 +75,22 @@
     } finally {
       isImporting = false;
     }
+  }
+
+  function setupWebSocket(playlistId: number) {
+    if (ws) {
+      console.log("Closing existing WebSocket connection.");
+      ws.close();
+    }
+    const wsUrl = `ws://127.0.0.1:8000/ws/import-logs/${playlistId}/`;
+    ws = new WebSocket(wsUrl);
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      logs.push(data.message);
+      if (logs.length > 100) {
+        logs.shift();
+      }
+    };
   }
 </script>
 
@@ -110,8 +128,24 @@
         </p>
       {/if}
     </form>
+    <div class="my-8 p-6 rounded-lg bg-black/50 border border-gray-700">
+      <h2 class="text-xl font-semibold mb-4">Import Logs</h2>
+      {#if logs.length > 0}
+        <div
+          class="h-48 overflow-y-auto bg-gray-900 rounded p-3 font-mono text-sm space-y-1"
+        >
+          {#each logs as log (log)}
+            <p class="text-gray-300">{log}</p>
+          {/each}
+        </div>
+      {:else}
+        <p class="text-gray-500">
+          Logs will appear here when you start an import.
+        </p>
+      {/if}
+    </div>
   </div>
-  
+
   <!-- Form for adding a new song -->
   <div class="my-8 p-6 rounded-lg bg-gray-800/50">
     <h2 class="text-2xl font-semibold mb-4">Add a New Song</h2>

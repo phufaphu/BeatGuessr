@@ -1,6 +1,7 @@
 import random
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.db.models import Count
 from .permissions import IsStaffUser
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -15,7 +16,7 @@ from .serializers import (
     GameHistorySerializer, ChangePasswordSerializer,
     SimplePlaylistSerializer, PlaylistDetailSerializer,
     AddSongSerializer, PlaylistWriteSerializer,
-    SongActionSerializer
+    SongActionSerializer, ImportPlaylistSerializer
 )
 
 from .song_processor import process_youtube_url
@@ -161,7 +162,13 @@ class UserViewSet(viewsets.ViewSet):
         return Response({"status": "password set"}, status=status.HTTP_200_OK)
 
 class PlaylistViewSet(viewsets.ModelViewSet):
-    queryset = Playlist.objects.all().prefetch_related('songs', 'songs__artist')
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_authenticated and user.is_staff:
+            return Playlist.objects.all().annotate(song_count=Count('songs')).prefetch_related('songs', 'songs__artist')
+        
+        return Playlist.objects.annotate(song_count=Count('songs')).filter(song_count__gt=0).prefetch_related('songs', 'songs__artist')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
