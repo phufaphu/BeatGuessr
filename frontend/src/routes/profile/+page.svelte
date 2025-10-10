@@ -3,7 +3,9 @@
 	import { user } from '$lib/authStore';
 	import { onMount } from 'svelte';
 	import { Gamepad2, Calendar, Star } from 'lucide-svelte';
-
+	import { addToast } from '$lib/toastStore';
+	import { goto } from '$app/navigation';
+    import { clearAuth } from '$lib/authStore';
 	// --- State ---
 	let history: any[] = $state([]);
 	let isLoading = $state(true);
@@ -33,18 +35,30 @@
 			minute: '2-digit'
 		});
 	}
+
+	function handleLogout() {
+      clearAuth();
+	  addToast("Logged out successfully.", 'info');
+      goto("/login");
+  }
 </script>
 
-<div class="container mx-auto p-4 md:p-8 text-white">
-	
+<div class="min-h-screen container mx-auto md:p-4 text-white">
 	<!-- User Profile Header -->
 	{#if $user}
-		<div class="mb-8 rounded-lg bg-gray-800/50 p-6 text-center">
+		<div class="mb-8 mt-8 glass p-6 text-center">
 			<h1 class="text-4xl font-bold">{$user.username}'s Profile</h1>
-			<p class="mt-2 text-lg text-gray-400">{$user.email}</p>
-            <a href="/profile/change-password" class="mt-4 inline-block rounded-md border border-purple-500 px-4 py-2 text-purple-300 transition hover:bg-purple-500 hover:text-white">
-			Change Password
-		    </a>
+			<p class="mt-2 text-lg text-white/70">{$user.email}</p>
+			<div class="flex flex-col md:flex-row items-center justify-center md:gap-4">
+				<a href="/profile/change-password" class="w-52 mt-4 inline-block rounded-lg border border-[#00c4e5] py-2 text-[#5bf3ff] font-bold transition hover:bg-[#00c4e5] hover:text-white">
+					Change Password
+				</a>
+				<button
+				onclick={handleLogout}
+				class="w-52 mt-4 inline-block rounded-lg border border-[#00c4e5] py-2 text-[#5bf3ff] font-bold transition hover:bg-[#00c4e5] hover:text-white"
+				>Logout</button
+				>
+			</div>
 		</div>
 	{/if}
 
@@ -60,10 +74,10 @@
 			<p>{error}</p>
 		</div>
 	{:else if history.length === 0}
-		<div class="rounded-md bg-gray-800/50 p-6 text-center">
+		<div class="glass p-6 text-center">
 			<p class="text-xl">No games played yet!</p>
-			<p class="mt-2 text-gray-400">Time to make history. Go play a game!</p>
-			<a href="/" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 font-bold transition hover:bg-purple-700">
+			<p class="mt-2 text-white/70">Time to make history. Go play a game!</p>
+			<a href="/" class="mt-4 inline-flex items-center gap-2 glass px-4 py-2 font-bold transition hover:bg-[#009cc0]">
 				<Gamepad2 />
 				Play Now
 			</a>
@@ -71,11 +85,11 @@
 	{:else}
 		<div class="space-y-4">
 			{#each history as game}
-				<div class="flex flex-col md:flex-row items-center justify-between gap-4 rounded-lg bg-gray-800/50 p-4 transition hover:bg-gray-700/50">
+				<div class="flex flex-col md:flex-row items-center justify-between gap-4 rounded-lg glass p-4">
 					<!-- Playlist Info -->
 					<div class="flex-1 text-center md:text-left">
 						<p class="text-xl font-bold">{game.playlist.name}</p>
-						<div class="mt-1 flex items-center justify-center md:justify-start gap-2 text-gray-400">
+						<div class="mt-1 flex items-center justify-center md:justify-start gap-2 text-white/70">
 							<Calendar class="h-4 w-4" />
 							<span>{formatDate(game.created_at)}</span>
 						</div>
