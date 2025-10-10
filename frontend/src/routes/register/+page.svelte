@@ -56,7 +56,8 @@
 				name="username"
 				type="text"
 				required
-				class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]"
+				class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/20 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]"
+				placeholder="Choose a username"
 			/>
 		</div>
 		<div>
@@ -67,7 +68,8 @@
 				name="email"
 				type="email"
 				required
-				class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]"
+				class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/20 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]"
+				placeholder="Enter your email address"
 			/>
 		</div>
 		<div>
@@ -78,7 +80,8 @@
 				name="password"
 				type="password"
 				required
-				class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]"
+				class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/20 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]"
+				placeholder="Create a password"
 			/>
 		</div>
 

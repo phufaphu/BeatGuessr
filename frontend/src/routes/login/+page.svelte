@@ -32,12 +32,12 @@
 </script>
 
 <div class="w-full max-w-xl glass p-4 md:p-8">
-  <h1 class="text-3xl font-sembold mb-4">Login</h1>
+  <h1 class="text-3xl font-semibold mb-5">Login</h1>
   <form onsubmit={handleLogin} class="space-y-4">
     <label for="username" class="mb-1 block text-sm font-medium text-white/70">Username</label>
-    <input bind:value={username} id="username" name="username" type="text" required class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]" />
+    <input bind:value={username} id="username" name="username" type="text" required class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/20 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]" placeholder="Enter your username"/>
     <label for="password" class="mb-1 block text-sm font-medium text-white/70">Password</label>
-    <input bind:value={password} id="password" name="password" type="password" required class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]" />
+    <input bind:value={password} id="password" name="password" type="password" required class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/20 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]" placeholder="Enter your password"/>
     <button type="submit" class="w-full rounded-lg mt-3 bg-[#00e0ff] px-4 py-2 font-bold text-black transition hover:bg-[#00c4e5] disabled:cursor-not-allowed disabled:bg-[#009cc0]">Login</button>
   </form>
   <p class="mt-4 text-center text-sm text-white/70">
