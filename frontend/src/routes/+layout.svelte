@@ -47,7 +47,7 @@
         {/if}
       </div>
     </nav>
-    <main class="flex-1 flex items-center justify-center mt-4 sm:mt-6 md:mt-8 text-center">
+    <main class="flex-1 flex items-center justify-center mt-4 sm:mt-6 md:mt-8">
       {@render children?.()}
     </main>
   </div>

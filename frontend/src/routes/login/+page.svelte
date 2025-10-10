@@ -31,11 +31,16 @@
   }
 </script>
 
-<div class="p-8">
-  <h1 class="text-3xl mb-4">Login</h1>
+<div class="w-full max-w-xl glass p-4 md:p-8">
+  <h1 class="text-3xl font-sembold mb-4">Login</h1>
   <form onsubmit={handleLogin} class="space-y-4">
-    <input bind:value={username} placeholder="Username" class="p-2 w-full text-white">
-    <input bind:value={password} type="password" placeholder="Password" class="p-2 w-full text-white">
-    <button type="submit" class="p-2 bg-purple-600 w-full">Login</button>
+    <label for="username" class="mb-1 block text-sm font-medium text-white/70">Username</label>
+    <input bind:value={username} id="username" name="username" type="text" required class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]" />
+    <label for="password" class="mb-1 block text-sm font-medium text-white/70">Password</label>
+    <input bind:value={password} id="password" name="password" type="password" required class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]" />
+    <button type="submit" class="w-full rounded-lg mt-3 bg-[#00e0ff] px-4 py-2 font-bold text-black transition hover:bg-[#00c4e5] disabled:cursor-not-allowed disabled:bg-[#009cc0]">Login</button>
   </form>
+  <p class="mt-4 text-center text-sm text-white/70">
+		Don't have an account? <a href="/register" class="font-medium text-[#00e0ff] hover:underline">Sign up</a>
+	</p>
 </div>

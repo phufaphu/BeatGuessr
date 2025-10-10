@@ -45,62 +45,60 @@
 	}
 </script>
 
-<div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-900 to-purple-800">
-	<div class="w-full max-w-md rounded-lg bg-gray-800 p-8 shadow-lg">
-		<h1 class="mb-6 text-center text-3xl font-bold text-white">Create an Account</h1>
-		<form onsubmit={handleRegister} class="space-y-4">
-			<div>
-				<label for="username" class="mb-1 block text-sm font-medium text-gray-300">Username</label>
-				<input
-					bind:value={username}
-					id="username"
-					name="username"
-					type="text"
-					required
-					class="w-full rounded-md border border-gray-600 bg-gray-700 p-2 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-purple-500"
-				/>
-			</div>
-			<div>
-				<label for="email" class="mb-1 block text-sm font-medium text-gray-300">Email Address</label>
-				<input
-					bind:value={email}
-					id="email"
-					name="email"
-					type="email"
-					required
-					class="w-full rounded-md border border-gray-600 bg-gray-700 p-2 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-purple-500"
-				/>
-			</div>
-			<div>
-				<label for="password" class="mb-1 block text-sm font-medium text-gray-300">Password</label>
-				<input
-					bind:value={password}
-					id="password"
-					name="password"
-					type="password"
-					required
-					class="w-full rounded-md border border-gray-600 bg-gray-700 p-2 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-purple-500"
-				/>
-			</div>
+<div class="w-full max-w-xl glass p-4 md:p-8">
+	<h1 class="mb-4 text-center text-3xl font-bold text-white">Create an Account</h1>
+	<form onsubmit={handleRegister} class="space-y-4">
+		<div>
+			<label for="username" class="mb-1 block text-sm font-medium text-white/70">Username</label>
+			<input
+				bind:value={username}
+				id="username"
+				name="username"
+				type="text"
+				required
+				class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]"
+			/>
+		</div>
+		<div>
+			<label for="email" class="mb-1 block text-sm font-medium text-white/70">Email Address</label>
+			<input
+				bind:value={email}
+				id="email"
+				name="email"
+				type="email"
+				required
+				class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]"
+			/>
+		</div>
+		<div>
+			<label for="password" class="mb-1 block text-sm font-medium text-white/70">Password</label>
+			<input
+				bind:value={password}
+				id="password"
+				name="password"
+				type="password"
+				required
+				class="w-full rounded-lg border border-white/20 p-2 text-white placeholder-white/70 focus:border-[#00c4e5] focus:outline-none focus:ring-[#00c4e5]"
+			/>
+		</div>
 
-			{#if error}
-				<p class="text-sm text-red-400">{error}</p>
+		{#if error}
+			<p class="text-sm text-red-400">{error}</p>
+		{/if}
+
+		<button
+			type="submit"
+			disabled={isLoading}
+			class="w-full rounded-lg mt-2 bg-[#00e0ff] px-4 py-2 font-bold text-black transition hover:bg-[#00c4e5] disabled:cursor-not-allowed disabled:bg-[#009cc0]"
+		>
+			{#if isLoading}
+				<span>Registering...</span>
+			{:else}
+				<span>Sign Up</span>
 			{/if}
-
-			<button
-				type="submit"
-				disabled={isLoading}
-				class="w-full rounded-md bg-purple-600 px-4 py-2 font-bold text-white transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-purple-800"
-			>
-				{#if isLoading}
-					<span>Registering...</span>
-				{:else}
-					<span>Sign Up</span>
-				{/if}
-			</button>
-		</form>
-		<p class="mt-4 text-center text-sm text-gray-400">
-			Already have an account? <a href="/login" class="font-medium text-purple-400 hover:underline">Log in</a>
-		</p>
-	</div>
+		</button>
+	</form>
+	<p class="mt-4 text-center text-sm text-white/70">
+		Already have an account? <a href="/login" class="font-medium text-[#00e0ff] hover:underline">Log in</a>
+	</p>
 </div>
