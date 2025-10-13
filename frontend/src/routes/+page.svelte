@@ -23,6 +23,7 @@
   >("idle");
   let gameId = $state<number | null>(null);
   let score = $state(0);
+  let lastPlayedPlaylist = $state<any>(null);
   let displayedRound = $state<any>(null);
   let currentRound = $state<any>(null);
   let lastAnswer = $state<{ isCorrect: boolean; correctSongId: number } | null>(
@@ -76,7 +77,7 @@
       currentRound = data.current_round;
       displayedRound = currentRound;
       lastAnswer = null;
-
+      lastPlayedPlaylist = data.playlist; 
       gameState = "playing";
       startRoundTimer();
     } catch (error) {
@@ -140,18 +141,12 @@
   }
 
   function resetGame() {
-    gameState = "idle";
-    gameId = null;
-    score = 0;
-    currentRound = null;
-    displayedRound = null;
-    lastAnswer = null;
-    clearInterval(timerInterval);
+    startCountdown(lastPlayedPlaylist?.id ?? null);
   };
   
   function handleStartClick(playlistId: number | null = null) {
 		if ($user) {
-      startCountdown(playlistId ?? undefined);
+      startCountdown(playlistId);
 		} else {
       addToast("Please log in to start a game.");
 			goto('/login');

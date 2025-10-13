@@ -19,10 +19,6 @@ class GameRoundOutSerializer(serializers.Serializer):
     snippet_url = serializers.CharField()
     choices = SongChoiceSerializer(many=True)
 
-class GameStateOutSerializer(serializers.Serializer):
-    game_id = serializers.IntegerField()
-    score = serializers.IntegerField()
-    current_round = GameRoundOutSerializer()
 
 class GuessResultSerializer(serializers.Serializer):
     is_correct = serializers.BooleanField()
@@ -66,6 +62,12 @@ class SimplePlaylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
         fields = ['id', 'name']
+        
+class GameStateOutSerializer(serializers.Serializer):
+    game_id = serializers.IntegerField()
+    score = serializers.IntegerField()
+    current_round = GameRoundOutSerializer()
+    playlist = SimplePlaylistSerializer()
 
 class GameHistorySerializer(serializers.ModelSerializer):
     playlist = SimplePlaylistSerializer(read_only=True)

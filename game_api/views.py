@@ -70,7 +70,8 @@ class GameViewSet(viewsets.ViewSet):
                 "round_id": first_round.id,
                 "snippet_url": request.build_absolute_uri(first_round.correct_song.snippet_file.url),
                 "choices": choices
-            }
+            },
+            "playlist": playlist
         }
         
         response_serializer = GameStateOutSerializer(instance=response_data)
