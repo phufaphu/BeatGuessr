@@ -135,10 +135,12 @@
                 type="text"
                 placeholder="https://www.youtube.com/playlist?list=..."
                 class="w-full p-3 rounded-xl glass placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#00E0FF]"
+                bind:value={youtubePlaylistUrl}
               />
             </div>
 						<button
 							class="px-6 py-3 rounded-xl bg-[#00E0FF] text-black font-semibold hover:bg-[#00c4e5] transition"
+              onclick={handleImportPlaylist}
 						>
 							{isImporting ? 'Starting Import...' : 'Start Import'}
 						</button>
@@ -175,6 +177,7 @@
                 type="text"
                 placeholder="Enter title"
                 class="w-full p-3 rounded-xl glass placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#00E0FF]"
+                bind:value={title}
               />
 	          </div>
             <div>
@@ -183,10 +186,12 @@
                 type="text"
                 placeholder="Enter artist"
                 class="w-full p-3 rounded-xl glass placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#00E0FF]"
+                bind:value={artist}
               />
             </div>
             <button
               class="w-full md:w-auto px-6 py-3 rounded-xl bg-[#00E0FF] text-black font-semibold hover:bg-[#00c4e5] transition"
+              onclick={handleAddSong}
             >
               {isAdding ? 'Processing...' : 'Add Song'}
             </button>
