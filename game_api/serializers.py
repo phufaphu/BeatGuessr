@@ -57,6 +57,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long.")
+        return value
+
 class SimplePlaylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
