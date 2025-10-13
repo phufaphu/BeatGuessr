@@ -116,7 +116,7 @@
       <button
         type="submit"
         disabled={isLoading}
-        class="w-full rounded-md bg-purple-600 px-4 py-2 font-bold text-white transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-purple-800"
+        class="w-full mt-1 rounded-md bg-[#A855F7] px-4 py-2 font-bold text-white transition hover:bg-[#A855F7]/80 disabled:cursor-not-allowed disabled:bg-[#A855F7]/60"
       >
         {isLoading ? "Changing..." : "Change Password"}
       </button>

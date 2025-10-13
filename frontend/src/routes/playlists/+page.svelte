@@ -30,12 +30,12 @@
     }
 </script>
 
-<div class="container mx-auto p-4 md:p-8">
+<div class="container mx-auto py-4 md:px-4">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-4xl font-bold text-white">Playlists</h1>
         
         {#if $user?.is_staff}
-            <a href="/playlists/create" class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 font-bold text-white transition hover:bg-green-700">
+            <a href="/playlists/create" class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#A855F7] px-4 py-2 font-bold text-white transition hover:bg-[#A855F7]/80">
                 <Plus class="h-5 w-5"/>
                 Create New
             </a>
@@ -56,15 +56,15 @@
     {:else}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {#each playlists as playlist (playlist.id)}
-                <div class="flex flex-col justify-between rounded-lg bg-gray-800/50 p-6 transition hover:shadow-lg hover:ring-2 hover:ring-purple-500">
+                <div class="flex flex-col justify-between glass p-6 hover:scale-[1.02] transition-transform">
                     <div>
-                        <h2 class="text-2xl font-bold text-purple-300 truncate">{playlist.name}</h2>
+                        <h2 class="text-2xl font-bold text-white truncate">{playlist.name}</h2>
                     </div>
                     
                     <div class="mt-4 flex items-center gap-2">
                         <button 
                             onclick={() => handlePlay(playlist.id)}
-                            class="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-purple-600 px-3 py-2 text-sm font-bold text-white hover:bg-purple-700"
+                            class="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-[#00E0FF] px-3 py-2 text-sm font-bold text-black hover:bg-[#00c4e5] transition shadow-[0_0_10px_#00E0FF,0_0_0px_#00E0FF]"
                         >
                             <Gamepad2 class="h-4 w-4"/>
                             Play
@@ -74,7 +74,7 @@
                             <a 
                                 href={`/playlists/${playlist.id}/edit`}
                                 title="Edit Playlist"
-                                class="inline-flex items-center justify-center gap-2 rounded-md border border-gray-500 p-2 text-gray-300 hover:bg-gray-700"
+                                class="inline-flex items-center justify-center gap-2 rounded-md border border-white/25 p-2 text-white/70 hover:bg-white/10 transition"
                             >
                                 <SquarePen class="h-4 w-4"/>
                             </a>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from "./$types";
   import api from "$lib/api";
-  import { X, Youtube } from "lucide-svelte";
+  import { X } from "lucide-svelte";
   import { writable } from "svelte/store";
   import { addToast } from "$lib/toastStore";
   
@@ -18,6 +18,7 @@
   let artist = $state("");
   let isAdding = $state(false);
   let formError = $state<string | null>(null);
+  let selectedOption = $state<'playlist' | 'song'>('playlist');
 
   async function handleAddSong() {
     isAdding = true;
@@ -101,121 +102,145 @@
   }
 </script>
 
-<div class="container mx-auto p-8 text-white">
-  <h1 class="text-4xl font-bold">Editing: {$playlist.name}</h1>
-  <div class="my-8 p-6 rounded-lg bg-blue-900/50 border border-blue-500">
-    <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
-      <Youtube class="text-red-500" />
-      Import from YouTube Playlist
-    </h2>
-    <p class="text-sm text-gray-400 mb-4">
-      Paste a YouTube playlist URL to automatically import all videos as songs.
-      This process runs in the background.
-    </p>
-    <form onsubmit={handleImportPlaylist} class="space-y-4">
-      <input
-        bind:value={youtubePlaylistUrl}
-        type="url"
-        placeholder="https://www.youtube.com/playlist?list=..."
-        required
-        class="w-full p-2 text-black rounded-md"
-      />
-      <button
-        type="submit"
-        disabled={isImporting}
-        class="p-2 bg-blue-600 rounded-md disabled:bg-gray-500 hover:bg-blue-700"
-      >
-        {isImporting ? "Starting Import..." : "Start Import"}
-      </button>
-      {#if importMessage}
-        <p class="text-green-300 mt-2">{importMessage}</p>
-        <p class="text-xs text-gray-400">
-          Note: It may take a few minutes for songs to appear. You can refresh
-          the page to check progress.
-        </p>
-      {/if}
-    </form>
-    <div class="my-8 p-6 rounded-lg bg-black/50 border border-gray-700">
-      <h2 class="text-xl font-semibold mb-4">Import Logs</h2>
-      {#if logs.length > 0}
-        <div
-          class="h-48 overflow-y-auto bg-gray-900 rounded p-3 font-mono text-sm space-y-1"
-        >
-          {#each logs as log (log)}
-            <p class="text-gray-300">{log}</p>
-          {/each}
-        </div>
-      {:else}
-        <p class="text-gray-500">
-          Logs will appear here when you start an import.
-        </p>
-      {/if}
-    </div>
-  </div>
+<div class="p-4 space-y-4 text-white">
+	<h1 class="text-3xl font-bold">Editing: {$playlist.name}</h1>
 
-  <!-- Form for adding a new song -->
-  <div class="my-8 p-6 rounded-lg bg-gray-800/50">
-    <h2 class="text-2xl font-semibold mb-4">Add a New Song</h2>
-    <form onsubmit={handleAddSong} class="space-y-4">
-      <input
-        bind:value={youtubeUrl}
-        type="url"
-        placeholder="YouTube URL"
-        required
-        class="w-full p-2 text-white rounded-md"
-      />
-      <input
-        bind:value={title}
-        type="text"
-        placeholder="Song Title"
-        required
-        class="w-full p-2 text-white rounded-md"
-      />
-      <input
-        bind:value={artist}
-        type="text"
-        placeholder="Artist Name"
-        required
-        class="w-full p-2 text-white rounded-md"
-      />
-      <button
-        type="submit"
-        disabled={isAdding}
-        class="p-2 bg-green-600 rounded-md disabled:bg-gray-500"
-      >
-        {isAdding ? "Processing..." : "Add Song to Playlist"}
-      </button>
-      {#if formError}<p class="text-red-400 mt-2">{formError}</p>{/if}
-    </form>
-  </div>
+	<!-- Combined Add/Import Section -->
+	<div class="p-6 rounded-lg glass space-y-4">
+		<h2 class="text-2xl font-semibold">Add to Playlist</h2>
+		<div class="flex flex-col space-y-4">
+			<div>
+				<label for="add-type" class="block mb-2 text-sm font-medium text-white/70"
+					>I want to add a...</label
+				>
+				<select
+					bind:value={selectedOption}
+					id="add-type"
+					class="w-full p-3 text-white glass"
+				>
+					<option class="text-black" value="playlist">YouTube Playlist</option>
+					<option class="text-black" value="song">Single Song</option>
+				</select>
+			</div>
 
-  <!-- List of current songs -->
-  <div>
-    <h2 class="text-2xl font-semibold mb-4">
-      Current Songs ({$playlist.songs.length})
-    </h2>
-    <div class="space-y-2">
-      {#each $playlist.songs as song (song.id)}
-        <div
-          class="flex items-center justify-between p-3 bg-gray-700/50 rounded-md"
-        >
-          <div>
-            <p class="font-bold">{song.title}</p>
-            <p class="text-sm text-gray-400">{song.artist_name}</p>
+			{#if selectedOption === 'playlist'}
+				<div>
+					<p class="text-white/70 text-sm mb-2">
+						Paste a YouTube playlist URL to automatically import all videos as songs. This process
+						runs in the background.
+					</p>
+					<div class="grid grid-cols-[1fr_1fr_auto] gap-4 items-center">
+						<div class="col-span-2">
+              <input
+                type="text"
+                placeholder="https://www.youtube.com/playlist?list=..."
+                class="w-full p-3 rounded-xl glass placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#00E0FF]"
+              />
+            </div>
+						<button
+							class="px-6 py-3 rounded-xl bg-[#00E0FF] text-black font-semibold hover:bg-[#00c4e5] transition"
+						>
+							{isImporting ? 'Starting Import...' : 'Start Import'}
+						</button>
+					</div>
+					{#if importMessage}
+						<div class="mt-4 p-4 rounded-md bg-green-600 bg-opacity-30 text-white">
+							{importMessage}
+							<p class="text-sm text-gray-200">
+								Note: It may take a few minutes for songs to appear. You can refresh the page to
+								check progress.
+							</p>
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<!-- Add Single Song UI -->
+				<div>
+          <p class="text-white/70 text-sm mb-2">
+            Paste a YouTube URL and enter the title and artist to add a single song.
+          </p>
+          <div class="mb-4">
+            <input
+              bind:value={youtubeUrl}
+              id="youtube-url"
+              type="text"
+              placeholder="https://www.youtube.com/watch?v=..."
+              class="w-full p-3 rounded-xl glass placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#00E0FF]"
+            />
           </div>
-          <button
-            onclick={() => handleRemoveSong(song.id)}
-            title="Remove Song"
-            class="p-2 rounded-full text-gray-400 transition hover:bg-red-500 hover:text-white"
-          >
-            <X class="h-5 w-5" />
-          </button>
-        </div>
-      {:else}
-        <p class="text-gray-400">
-          This playlist is empty. Add a song to get started!
-        </p>
-      {/each}
-    </div>
-  </div>
+					<div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+	          <div>
+              <input
+                id="song-title"
+                type="text"
+                placeholder="Enter title"
+                class="w-full p-3 rounded-xl glass placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#00E0FF]"
+              />
+	          </div>
+            <div>
+              <input
+                id="artist-name"
+                type="text"
+                placeholder="Enter artist"
+                class="w-full p-3 rounded-xl glass placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#00E0FF]"
+              />
+            </div>
+            <button
+              class="w-full md:w-auto px-6 py-3 rounded-xl bg-[#00E0FF] text-black font-semibold hover:bg-[#00c4e5] transition"
+            >
+              {isAdding ? 'Processing...' : 'Add Song'}
+            </button>
+          </div>
+					{#if formError}
+						<div class="mt-4 p-4 rounded-md bg-red-600 bg-opacity-30 text-white">
+							{formError}
+						</div>
+					{/if}
+				</div>
+			{/if}
+		</div>
+	</div>
+
+	{#if selectedOption === 'playlist'}
+		<div class="p-6 rounded-lg glass space-y-4">
+			<h2 class="text-2xl font-semibold">Import Logs</h2>
+			<div class="p-4 rounded-md min-h-[150px] border border-white/20 bg-whie/20 overflow-y-auto max-h-64">
+				{#if logs.length > 0}
+					<ul class="space-y-2">
+						{#each logs as log (log)}
+							<li class="font-poppins text-sm text-gray-100">{log}</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="text-white/70">Logs will appear here when you start an import.</p>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Current Songs Section -->
+	<div class="p-6 rounded-lg glass">
+		<h2 class="text-2xl font-semibold mb-4">Current Songs ({$playlist.songs.length})</h2>
+		<div class="space-y-4">
+			{#each $playlist.songs as song (song.id)}
+				<div
+					class="flex items-center justify-between p-4 glass"
+				>
+					<div>
+						<p class="font-bold">{song.title}</p>
+						<p class="text-sm text-white/70">{song.artist_name}</p>
+					</div>
+					<button
+						onclick={() => handleRemoveSong(song.id)}
+						title="Remove Song"
+						class="p-2 rounded-full text-gray-400 transition hover:bg-[#FF5ACD] hover:text-white"
+					>
+						<X />
+					</button>
+				</div>
+			{:else}
+				<p class="text-white/70">This playlist is empty. Add a song to get started!</p>
+			{/each}
+		</div>
+	</div>
 </div>
