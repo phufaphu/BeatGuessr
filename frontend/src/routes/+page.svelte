@@ -146,11 +146,23 @@
   
   function handleStartClick(playlistId: number | null = null) {
 		if ($user) {
-      startCountdown(playlistId);
-		} else {
-      addToast("Please log in to start a game.");
-			goto('/login');
-		}
+    // 🔊 Unlock audio for mobile
+    if (audioPlayer) {
+      audioPlayer.play().then(() => {
+        if (audioPlayer) {
+          audioPlayer.pause();
+          audioPlayer.currentTime = 0;
+        }
+      }).catch(() => {
+        console.log('Audio unlock failed (probably fine on desktop)');
+      });
+    }
+
+    startCountdown(playlistId);
+  } else {
+    addToast("Please log in to start a game.");
+    goto('/login');
+  }
 	}
 </script>
 
@@ -226,6 +238,7 @@
       </div>
       <audio
         controls
+        playsinline
         src={displayedRound.snippet_url}
         class="w-full hidden"
         bind:this={audioPlayer}

@@ -33,7 +33,24 @@ def process_youtube_url(url: str, title: str, artist_name: str):
 def download_audio(url: str):
     print(f"Downloading: {url}")
     try:
-        video_id = url.split("v=")[-1].split("&")[0]
+        # 🛡️ Extract Video ID robustly
+        import re
+        patterns = [
+            r'(?:v=|\/)([0-9A-Za-z_-]{11}).*',
+            r'(?:youtu\.be\/)([0-9A-Za-z_-]{11})',
+            r'(?:embed\/)([0-9A-Za-z_-]{11})',
+        ]
+        
+        video_id = None
+        for pattern in patterns:
+            match = re.search(pattern, url)
+            if match:
+                video_id = match.group(1)
+                break
+        
+        if not video_id:
+            print(f"Could not extract video ID from {url}")
+            return None
         temp_file_path = os.path.join(DOWNLOAD_DIR, f"{video_id}.mp3")
         
         subprocess.run([

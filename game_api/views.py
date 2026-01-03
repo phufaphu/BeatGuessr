@@ -2,6 +2,7 @@ import random
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Count
+from django.conf import settings
 from .permissions import IsStaffUser
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -62,13 +63,14 @@ class GameViewSet(viewsets.ViewSet):
 
         first_round = game.rounds.first()
         choices = generate_choices(first_round.correct_song, all_songs_in_playlist)
-        
+        snippet_path = first_round.correct_song.snippet_file.url
+        snippet_url = snippet_path
         response_data = {
             "game_id": game.id,
             "score": game.score,
             "current_round": {
                 "round_id": first_round.id,
-                "snippet_url": request.build_absolute_uri(first_round.correct_song.snippet_file.url),
+                "snippet_url": snippet_url,
                 "choices": choices
             },
             "playlist": playlist
@@ -95,7 +97,10 @@ class GameViewSet(viewsets.ViewSet):
                 is_correct = (current_round.correct_song.id == user_choice.id)
 
             if current_round.user_choice is not None:
-                return Response({"detail": "This round has already been answered."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"detail": "This round has already been answered."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
             current_round.user_choice = user_choice
             current_round.is_correct = is_correct
@@ -105,33 +110,46 @@ class GameViewSet(viewsets.ViewSet):
                 game.score += 10
                 game.save()
 
-            next_round_obj = GameRound.objects.filter(game=game, id__gt=current_round.id).order_by('id').first()
-            
+            # 🔍 Get next round (if any)
+            next_round_obj = (
+                GameRound.objects.filter(game=game, id__gt=current_round.id)
+                .order_by('id')
+                .first()
+            )
+
             next_round_data = None
-            is_game_over = True
-            if next_round_obj:
+            is_game_over = False
+
+            if next_round_obj is not None:
                 playlist_songs = list(game.playlist.songs.all())
                 choices = generate_choices(next_round_obj.correct_song, playlist_songs)
+
+                snippet_path = next_round_obj.correct_song.snippet_file.url
+                snippet_path = next_round_obj.correct_song.snippet_file.url
+                snippet_url = snippet_path
+
                 next_round_data = {
                     "round_id": next_round_obj.id,
-                    "snippet_url": request.build_absolute_uri(next_round_obj.correct_song.snippet_file.url),
+                    "snippet_url": snippet_url,
                     "choices": choices
                 }
-                is_game_over = False
             else:
+                # ✅ No next round = game over
                 game.is_complete = True
                 game.save()
-            
+                is_game_over = True
+
             response_data = {
                 "is_correct": is_correct,
                 "correct_song_id": current_round.correct_song.id,
                 "new_score": game.score,
                 "next_round": next_round_data,
-                "is_game_over": is_game_over
+                "is_game_over": is_game_over,
             }
-        
-        response_serializer = GuessResultSerializer(instance=response_data)
-        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+            response_serializer = GuessResultSerializer(instance=response_data)
+            return Response(response_serializer.data, status=status.HTTP_200_OK)
+
 
 class UserViewSet(viewsets.ViewSet):
     queryset = User.objects.all()

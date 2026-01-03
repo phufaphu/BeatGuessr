@@ -27,8 +27,7 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default=[], cast=list)
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -58,7 +57,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = ['http://localhost:5173','http://127.0.0.1:5173']
+# CORS_ALLOWED_ORIGINS = ['http://localhost:5173','http://127.0.0.1:5173']
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'config.urls'
 
@@ -192,3 +192,5 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+SITE_URL = config('DJANGO_SITE_URL', default='http://127.0.0.1:8000')
