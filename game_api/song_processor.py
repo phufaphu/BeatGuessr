@@ -53,11 +53,37 @@ def download_audio(url: str):
             return None
         temp_file_path = os.path.join(DOWNLOAD_DIR, f"{video_id}.mp3")
         
-        subprocess.run([
-            "yt-dlp", "-x", "--audio-format", "mp3",
-            "-o", temp_file_path,
-            url
-        ], check=True, capture_output=True)
+        import shutil
+        node_path = shutil.which('node')
+        if not node_path:
+            # Fallback search for common Node.js installations on macOS
+            for path in ['/opt/homebrew/bin/node', '/usr/local/bin/node']:
+                if os.path.exists(path):
+                    node_path = path
+                    break
+        
+        import yt_dlp
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': os.path.join(DOWNLOAD_DIR, video_id),
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'noplaylist': True,
+            'quiet': True,
+        }
+        
+        if node_path:
+            ydl_opts['js_runtimes'] = {
+                'node': {'path': node_path}
+            }
+            ydl_opts['remote_components'] = ['ejs:github']
+            
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+            
         return temp_file_path
     except Exception as e:
         print(f"Failed to download {url}. Error: {e}")
